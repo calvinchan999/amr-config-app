@@ -1,8 +1,35 @@
-.App {
+:root {
+  background: url("../public/images/bg-black.png");
+  width: 100%;
+}
+/* .App {
   text-align: center;
+} */
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
 }
 
-.App-logo {
+.editor {
+  flex: 1;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.submit-btn {
+  flex: 1;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  margin: 15px;
+}
+
+/* .App-logo {
   height: 40vmin;
   pointer-events: none;
 }
@@ -35,4 +62,4 @@
   to {
     transform: rotate(360deg);
   }
-}
+} */
