@@ -1,15 +1,25 @@
-:root {
-  background: url("../public/images/bg-black.png");
-  width: 100%;
+* {
+  color: #fff;
 }
+
 /* .App {
   text-align: center;
 } */
 
 .app-container {
+  background-image: url("../public/images/bg-black.png") !important;
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
+}
+
+.chakra-yml-form {
+  flex: 1;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 500px;
 }
 
 .editor {
