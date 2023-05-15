@@ -17,17 +17,17 @@ import {
 import YmlForm from "./YmlForm";
 import VscodeEditor from "./VscodeEditor";
 
-
 function App() {
   const [yamlValue, setYamlValue] = useState(null);
   const [formElements, setFormElements] = useState([]);
   const [temp, setTemp] = useState(null);
   useEffect(() => {
     const getYaml = async () => {
-      const response = await fetch("/amr-config/application.yml");
+      const response = await fetch("/api/amr-config");
       const text = await response.text();
+      console.log(text);
       setTemp(text);
-      setYamlValue(load(text));
+      setYamlValue(JSON.parse(text));
     };
     getYaml();
   }, []);
@@ -37,14 +37,11 @@ function App() {
       if (!yamlObject) {
         return [];
       }
-
       const elements = Object.entries(yamlObject).map(([key, value]) => {
-        // console.log({ key, value, type: typeof value });
         if (typeof value === "object" && !Array.isArray(value)) {
           const nestedElements = parseYamlToForm(value, `${prefix}${key}|`);
 
           return (
-            // <Card key={`${prefix}${key}`} m={5} >
             <Accordion
               // allowMultiple
               allowToggle
@@ -61,7 +58,6 @@ function App() {
                 <AccordionPanel pb={4}>{nestedElements}</AccordionPanel>
               </AccordionItem>
             </Accordion>
-            // </Card>
           );
         } else if (typeof value === "string" || typeof value === "number") {
           return (
@@ -161,9 +157,18 @@ function App() {
       indent: 2,
       lineWidth: -1,
     });
+    console.log(yamlValue);
     console.log(jsonToYaml);
+    console.log(JSON.stringify(yamlValue));
     console.log(typeof yamlValue);
     // fs.writeFileSync("/amr-config/application.yml", yamlString);
+    fetch("/api/amr-config", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(yamlValue),
+    });
   };
 
   return (

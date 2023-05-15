@@ -1,7 +1,7 @@
 // import "./App.css";
 import React from "react";
 import "./YmlForm.css";
-import { Box, Container } from "@chakra-ui/react";
+import { Container } from "@chakra-ui/react";
 function YmlForm(props) {
   return (
     <>
