@@ -12,6 +12,12 @@ spring:
       settings:
          trace: false
          web-allow-others: true
+         test:
+            test2:
+               test3:
+                  test4:
+                     test5:
+                        testvalue: true
    main:
       allow-circular-references: true
    mvc:
@@ -76,11 +82,11 @@ logging:
 
 acl:
    apiKeyList:
-   - token: 1df5c285b32e4532b23ec40569200d2a
+   - token: 1df5c285b32
      cidr: 127.0.0.1/32
-   - token: f05914ea33124ba7a6cab301627c8adf
+   - token: f05914ea331
      cidr: 0.0.0.0/0
-   - token: rvautotech
+   - token: test
      cidr: 0.0.0.0/0
 
 action:

@@ -1,99 +1,67 @@
 import "./App.css";
 import React, { useState, useEffect } from "react";
-import { load } from "js-yaml";
+import { load, dump } from "js-yaml";
 import { ChakraProvider } from "@chakra-ui/react";
 import {
   FormControl,
   FormLabel,
   Checkbox,
   Input,
+  Accordion,
+  AccordionItem,
+  AccordionButton,
+  AccordionPanel,
+  Button,
   Stack,
-  Text,
-  Box,
 } from "@chakra-ui/react";
 import YmlForm from "./YmlForm";
-// import chakraTheme from '@chakra-ui/theme'
+import VscodeEditor from "./VscodeEditor";
 
-// const { Button } = chakraTheme.components
-
-// const theme = extendBaseTheme({
-//   components: {
-//     Button,
-//   },
-// })
 
 function App() {
   const [yamlValue, setYamlValue] = useState(null);
   const [formElements, setFormElements] = useState([]);
-
+  const [temp, setTemp] = useState(null);
   useEffect(() => {
     const getYaml = async () => {
       const response = await fetch("/amr-config/application.yml");
       const text = await response.text();
+      setTemp(text);
       setYamlValue(load(text));
     };
     getYaml();
   }, []);
 
   useEffect(() => {
-    // const parseYamlToForm = (yamlObject, prefix = "") => {
-    //   // console.log(yamlObject);
-    //   if (!yamlObject) {
-    //     return [];
-    //   }
-    //   console.log(yamlObject);
-    //   const elements = Object.entries(yamlObject).map(([key, value]) => {
-    //     console.table({ key, value });
-    //     if (typeof value === "object" && !Array.isArray(value)) {
-    //       return parseYamlToForm(value, `${prefix}${key}.`);
-    //     } else if (typeof value === "string" || typeof value === "number") {
-    //       return (
-    //         <Form.Group controlId={`${prefix}${key}`}>
-    //           <Form.Label>{key}</Form.Label>
-    //           <Form.Control type="text" defaultValue={value} />
-    //         </Form.Group>
-    //       );
-    //     } else if (Array.isArray(value)) {
-    //       return (
-    //         <Form.Group controlId={`${prefix}${key}`}>
-    //           <Form.Label>{key}</Form.Label>
-    //           <Form.Control type="text" defaultValue={value} />
-    //           {/* <Form.Control as="select" multiple>
-    //             {value.map((option, index) => (
-    //               <option key={`${prefix}${key}-${index}`} value={option}>
-    //                 {option}
-    //               </option>
-    //             ))}
-    //           </Form.Control> */}
-    //         </Form.Group>
-    //       );
-    //     } else if (typeof value === "boolean") {
-    //       return (
-    //         <Form.Group controlId={`${prefix}${key}`}>
-    //           {/* <Form.Label>{key}</Form.Label> */}
-    //           <Form.Check type="checkbox" label={key} defaultValue={value} />
-    //         </Form.Group>
-    //       );
-    //     } else {
-    //       return null;
-    //     }
-    //   });
-    //   return elements;
-    // };
-
     const parseYamlToForm = (yamlObject, prefix = "") => {
       if (!yamlObject) {
         return [];
       }
+
       const elements = Object.entries(yamlObject).map(([key, value]) => {
-        console.log({ key, value, type: typeof value });
+        // console.log({ key, value, type: typeof value });
         if (typeof value === "object" && !Array.isArray(value)) {
-          const nestedElements = parseYamlToForm(value, `${prefix}${key}.`);
+          const nestedElements = parseYamlToForm(value, `${prefix}${key}|`);
+
           return (
-            <Box key={`${prefix}${key}`}>
-              <FormLabel>{key}:</FormLabel>
-              {nestedElements}
-            </Box>
+            // <Card key={`${prefix}${key}`} m={5} >
+            <Accordion
+              // allowMultiple
+              allowToggle
+              defaultIndex={[0, 1, 2]}
+              borderColor={"transparent"}
+              key={`${prefix}${key}`}
+            >
+              <AccordionItem>
+                <h2>
+                  <AccordionButton className="form-label">
+                    {key}:
+                  </AccordionButton>
+                </h2>
+                <AccordionPanel pb={4}>{nestedElements}</AccordionPanel>
+              </AccordionItem>
+            </Accordion>
+            // </Card>
           );
         } else if (typeof value === "string" || typeof value === "number") {
           return (
@@ -103,8 +71,16 @@ function App() {
               id={`${prefix}${key}`}
               backgroundColor={"transparent"}
             >
-              <FormLabel>{key}</FormLabel>
-              <Input type="text" defaultValue={value} />
+              <FormLabel className="form-label">{key}</FormLabel>
+              <Input
+                type="text"
+                defaultValue={value}
+                className="form-label"
+                onChange={(event) => {
+                  const { value } = event.target;
+                  handleChangeValue(`${prefix}${key}`, value);
+                }}
+              />
             </FormControl>
           );
         } else if (Array.isArray(value)) {
@@ -115,8 +91,21 @@ function App() {
               id={`${prefix}${key}`}
               backgroundColor={"transparent"}
             >
-              <FormLabel>{key}</FormLabel>
-              <Input type="text" defaultValue={value} />
+              <FormLabel className="form-label">{key}</FormLabel>
+              <Input
+                type="text"
+                defaultValue={JSON.stringify(value)}
+                className="form-label"
+                onChange={(event) => {
+                  const { value } = event.target;
+                  try {
+                    const parsedValue = JSON.parse(value);
+                    handleChangeValue(`${prefix}${key}`, parsedValue);
+                  } catch (error) {
+                    console.error(error);
+                  }
+                }}
+              />
             </FormControl>
           );
         } else if (typeof value === "boolean") {
@@ -127,7 +116,19 @@ function App() {
               id={`${prefix}${key}`}
               backgroundColor={"transparent"}
             >
-              <Checkbox defaultChecked={value}>{key}</Checkbox>
+              <Checkbox
+                defaultChecked={value}
+                className="form-label"
+                key={`${prefix}${key}`}
+                id={`${prefix}${key}`}
+                onChange={(event) => {
+                  const { checked } = event.target;
+                  console.log(checked);
+                  handleChangeValue(`${prefix}${key}`, checked);
+                }}
+              >
+                {key}
+              </Checkbox>
             </FormControl>
           );
         } else {
@@ -143,12 +144,43 @@ function App() {
     }
   }, [yamlValue]);
 
+  const handleChangeValue = (key, value) => {
+    const keys = key.split("|");
+    let obj = yamlValue;
+    for (let i = 0; i < keys.length - 1; i++) {
+      obj = obj[keys[i]];
+    }
+    obj[keys[keys.length - 1]] = value;
+    setYamlValue({ ...yamlValue });
+  };
+
+  const handleSubmit = () => {
+    const jsonToYaml = dump(yamlValue, {
+      noCompatMode: true,
+      noQuotes: true,
+      indent: 2,
+      lineWidth: -1,
+    });
+    console.log(jsonToYaml);
+    console.log(typeof yamlValue);
+    // fs.writeFileSync("/amr-config/application.yml", yamlString);
+  };
+
   return (
     <ChakraProvider>
       <div className="app-container">
         <div className="chakra-yml-form">
           <YmlForm html={formElements}></YmlForm>
         </div>
+        <div className="submit-btn">
+          <Stack direction="column">
+            <Button colorScheme="red">Reboot</Button>
+            <Button colorScheme="blue" onClick={handleSubmit}>
+              Save
+            </Button>
+          </Stack>
+        </div>
+        {/* <VscodeEditor yml={temp}></VscodeEditor> */}
       </div>
     </ChakraProvider>
   );
